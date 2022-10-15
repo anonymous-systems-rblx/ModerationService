@@ -14,10 +14,13 @@ local DefaultReasonWarn = "[ModerationService] Reason unspecified."
 
 -- | Code @ DO NOT TOUCH UNLESS YOU KNOW WHAT YOU ARE DOING
 
+if not RunService:IsServer() then return error("ModerationService can only be required from server") end
+
 local service = {}
 
 function service:viewWarnings(UserId)
-	if UserId == nil then return error("Parameter UserId is nil") end
+	if UserId == nil or not UserId then return error("Parameter UserId is nil") end
+	
 	local DataValue
 	local success, result = pcall(function()
 		DataValue = ModerationDatastore:GetAsync("-Warn"..UserId)
@@ -37,13 +40,12 @@ end
 function service:addWarning(UserId, Reason)
 	if UserId == nil then return error("Parameter UserId is nil") end
 	if Reason == nil then Reason = DefaultReasonWarn end
-	local Warnings = service:viewWarnings(UserId)
 	
+	local Warnings = service:viewWarnings(UserId)
 	local success, result = pcall(function()
 		if typeof(Warnings) ~= "table" then
 			ModerationDatastore:SetAsync("-Warn"..UserId,{Reason})
 		else
-			print(unpack(Warnings))
 			ModerationDatastore:SetAsync("-Warn"..UserId,{unpack(Warnings),Reason})
 		end
 	end)
@@ -68,6 +70,7 @@ end
 function service:Ban(UserId, Reason, Moderator)
 	if UserId == nil then return error("Parameter UserId is nil") end
 	if Reason == nil then Reason = DefaultReasonBan end
+	
 	if not RunService:IsStudio() then
 		MessagingService:PublishAsync("ModerationService_CreateAction",{UserId, Reason})
 	else
