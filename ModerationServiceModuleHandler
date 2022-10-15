@@ -1,10 +1,25 @@
 -- | Variables
 
-local ModerationService = require(script.Parent)
+local Module = script.Parent
+local ModerationService = require(Module)
 local MessagingService = game:GetService("MessagingService")
 local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
 
 -- | Code
+
+local currentVersion = Module:GetAttribute("Version")
+local versionData
+local versionSuccess, versionResult = pcall(function()
+	versionData = HttpService:GetAsync("https://raw.githubusercontent.com/anonymous-systems-rblx/ModerationService/main/Version.txt")
+end)
+if versionSuccess then
+	if not string.find(versionData, currentVersion) then
+		warn("[ModerationService] You are currently not running on the most updated version of ModerationService!")
+	end
+else
+	warn("[ModerationService] Failed to get Module Version \n Error:",versionResult)
+end
 
 Players.PlayerAdded:Connect(function(Player)
 	local CheckBan = ModerationService:CheckBan(Player.UserId)
