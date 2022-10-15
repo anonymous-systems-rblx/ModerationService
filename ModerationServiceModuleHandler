@@ -1,0 +1,32 @@
+-- | Variables
+
+local ModerationService = require(script.Parent)
+local MessagingService = game:GetService("MessagingService")
+local Players = game:GetService("Players")
+
+-- | Code
+
+Players.PlayerAdded:Connect(function(Player)
+	local CheckBan = ModerationService:CheckBan(Player.UserId)
+	if typeof(CheckBan) ~= "table" then return end
+	
+	local IsBanned = CheckBan[1]
+	local BanReason = CheckBan[2]
+	if IsBanned then
+		Player:Kick(BanReason)
+	elseif not IsBanned then
+		return
+	end
+end)
+
+MessagingService:SubscribeAsync("ModerationService_CreateAction", function(message)
+	local MessageData = message.Data
+	local UserId = MessageData[1]
+	local Reason = MessageData[2]
+	
+	local Player = Players:GetPlayerByUserId(UserId)
+	if not Player then return end
+	Player:Kick(Reason)	
+	return
+end)
+
