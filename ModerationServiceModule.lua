@@ -46,7 +46,8 @@ function service:addWarning(UserId, Reason)
 		if typeof(Warnings) ~= "table" then
 			ModerationDatastore:SetAsync("-Warn"..UserId,{Reason})
 		else
-			ModerationDatastore:SetAsync("-Warn"..UserId,{unpack(Warnings),Reason})
+			table.insert(Warnings, Reason)
+			ModerationDatastore:SetAsync("-Warn"..UserId,Warnings)
 		end
 	end)
 	if not success then
